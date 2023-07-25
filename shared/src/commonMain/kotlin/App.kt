@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import model.IslandDataClass
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.resource
 
 @OptIn(ExperimentalResourceApi::class)
@@ -36,31 +35,35 @@ import org.jetbrains.compose.resources.resource
 fun App() {
     MaterialTheme {
         val listOfIsland = listOf(
-            IslandDataClass(1, "Bali", "Indonesia", Color(0xFF3389e2), "bali.jpg"),
+            IslandDataClass(1, "Bali", "Indonesia", Color(0xFF3389e2), "bali_icon.jpg"),
             IslandDataClass(2, "Yosemite", "California", Color(0xFFee6659), "yosemite.jpg"),
             IslandDataClass(3, "Rayyu", "Maldives", Color(0xFF4ecab0), "rayyu_maldives.jpg"),
-            IslandDataClass(1, "Viti Levu", "Fiji", Color(0xFF7D5260), "vitilevu.jpg"),
-            IslandDataClass(1, "Beqa", "Fiji", Color(0xFF625b71), "beqa.jpg")
+            IslandDataClass(4, "Viti Levu", "Fiji", Color(0xFF7D5260), "viti_levu.jpg"),
+            IslandDataClass(5, "Beqa", "Fiji", Color(0xFF625b71), "beqa.jpg")
         )
-
-        val image = remember { mutableStateOf<ImageBitmap?>(null) }
+        val bitMapImages = remember { mutableStateOf<Map<Int, ImageBitmap>>(emptyMap()) }
 
         LaunchedEffect(Unit) {
-            for (item in listOfIsland)
-            image.value = resource(item.resImage).readBytes().toImageBitmap()
+            val imagesMap = mutableMapOf<Int, ImageBitmap>()
+            for (item in listOfIsland) {
+                imagesMap[item.id] = resource(item.resImage).readBytes().toImageBitmap()
+            }
+            bitMapImages.value = imagesMap
         }
 
+
         Column(modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)) {
-            ItemList(listOfIsland, image.value!!)
+            ItemList(listOfIsland, bitMapImages.value)
         }
     }
 }
 
 @Composable
-fun ItemList(itemList: List<IslandDataClass>, image:ImageBitmap) {
+fun ItemList(itemList: List<IslandDataClass>, image: Map<Int, ImageBitmap>) {
     LazyColumn {
         items(itemList) { item ->
-            CardImageView(item, image)
+            image[item.id]?.let { CardImageView(item, it) }
+
         }
     }
 }
